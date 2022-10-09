@@ -17,6 +17,9 @@ defmodule OAuth2.Strategy.ClientCredentials do
 
   use OAuth2.Strategy
 
+  @impl true
+  def initialize(client), do: client
+
   @doc """
   Not used for this strategy.
   """

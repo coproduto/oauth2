@@ -29,6 +29,20 @@ defmodule OAuth2.Strategy.AuthCode do
   @pkce_code_bytes 32
   @pkce_code_length 43
 
+  @impl true
+  def initialize(client) do
+    if client.pkce do
+      verifier = pkce_code_verifier()
+
+      client
+      |> put_private(:code_verifier, verifier)
+      |> put_param(:code_challenge, pkce_challenge_from_verifier(verifier))
+      |> put_param(:code_challenge_method, "S256")      
+    else
+      client
+    end
+  end
+
   @doc """
   The authorization URL endpoint of the provider.
   params additional query parameters for the URL
@@ -39,7 +53,6 @@ defmodule OAuth2.Strategy.AuthCode do
     |> put_param(:response_type, "code")
     |> put_param(:client_id, client.client_id)
     |> put_param(:redirect_uri, client.redirect_uri)
-    |> handle_authorization_pkce()
     |> merge_params(params)
   end
 
@@ -63,19 +76,6 @@ defmodule OAuth2.Strategy.AuthCode do
     |> merge_params(params)
     |> basic_auth()
     |> put_headers(headers)
-  end
-
-  defp handle_authorization_pkce(client) do
-    if client.pkce do
-      verifier = pkce_code_verifier()
-
-      client
-      |> put_private(:code_verifier, verifier)
-      |> put_param(:code_challenge, pkce_challenge_from_verifier(verifier))
-      |> put_param(:code_challenge_method, "S256")
-    else
-      client
-    end
   end
 
   defp handle_token_pkce(client) do

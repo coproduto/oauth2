@@ -66,6 +66,22 @@ defmodule OAuth2.Strategy do
   alias OAuth2.Client
 
   @doc """
+  Performs any required parameter transformations when the client is created.
+
+  ## Example
+
+      def initialize(client) do
+        if client.params["generate_random_code"] do
+          random_code = Base.url_encode64(:crypto.strong_rand_bytes(32))
+          put_param(client, :random_code, random_code)
+        else
+          client
+        end
+      end
+  """
+  @callback initialize(Client.t()) :: Client.t()
+
+  @doc """
   Builds the URL to the authorization endpoint.
 
   ## Example

@@ -142,7 +142,14 @@ defmodule OAuth2.Client do
       |> Keyword.put(:token, process_token(token))
       |> Keyword.put(:request_opts, Keyword.merge(client.request_opts, req_opts))
 
-    struct(client, opts)
+    client
+    |> struct(opts)
+    |> initialize()
+  end
+
+  @spec initialize(Client.t()) :: Client.t()
+  def initialize(client) do
+    client.strategy.initialize(client)
   end
 
   defp process_token(nil), do: nil
