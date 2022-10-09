@@ -26,6 +26,9 @@ defmodule OAuth2.Strategy.AuthCode do
 
   use OAuth2.Strategy
 
+  @pkce_code_bytes 32
+  @pkce_code_length 43
+
   @doc """
   The authorization URL endpoint of the provider.
   params additional query parameters for the URL
@@ -36,6 +39,7 @@ defmodule OAuth2.Strategy.AuthCode do
     |> put_param(:response_type, "code")
     |> put_param(:client_id, client.client_id)
     |> put_param(:redirect_uri, client.redirect_uri)
+    |> handle_pkce()
     |> merge_params(params)
   end
 
@@ -58,5 +62,24 @@ defmodule OAuth2.Strategy.AuthCode do
     |> merge_params(params)
     |> basic_auth()
     |> put_headers(headers)
+  end
+
+  defp handle_pkce(client) do
+    if client.pkce do
+      client
+      |> put_param(:code_challenge, pkce_code_challenge())
+      |> put_param(:code_challenge_method, "S256")
+    else
+      client
+    end
+  end
+
+  defp pkce_code_challenge() do
+    @pkce_code_bytes
+    |> :crypto.strong_rand_bytes()
+    |> Base.url_encode64()
+    |> binary_part(0, @pkce_code_length)
+    |> then(& :crypto.hash(:sha256, &1))
+    |> Base.url_encode64()
   end
 end

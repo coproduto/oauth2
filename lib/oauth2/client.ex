@@ -38,6 +38,7 @@ defmodule OAuth2.Client do
   @type headers :: [{binary, binary}]
   @type param :: binary | %{binary => param} | [param]
   @type params :: %{binary => param} | Keyword.t() | %{}
+  @type pkce :: boolean
   @type redirect_uri :: binary
   @type ref :: reference | nil
   @type request_opts :: Keyword.t()
@@ -54,6 +55,7 @@ defmodule OAuth2.Client do
           client_secret: client_secret,
           headers: headers,
           params: params,
+          pkce: pkce,
           redirect_uri: redirect_uri,
           ref: ref,
           request_opts: request_opts,
@@ -78,7 +80,8 @@ defmodule OAuth2.Client do
             strategy: OAuth2.Strategy.AuthCode,
             token: nil,
             token_method: :post,
-            token_url: "/oauth/token"
+            token_url: "/oauth/token",
+            pkce: false
 
   @doc """
   Builds a new `OAuth2.Client` struct using the `opts` provided.
