@@ -100,5 +100,6 @@ defmodule OAuth2.Strategy.AuthCode do
     verifier
     |> then(& :crypto.hash(:sha256, &1))
     |> Base.url_encode64()
+    |> String.replace("=", "")
   end
 end
