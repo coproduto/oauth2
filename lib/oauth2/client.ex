@@ -39,6 +39,7 @@ defmodule OAuth2.Client do
   @type param :: binary | %{binary => param} | [param]
   @type params :: %{binary => param} | Keyword.t() | %{}
   @type pkce :: boolean
+  @type private :: %{binary => param} | %{}
   @type redirect_uri :: binary
   @type ref :: reference | nil
   @type request_opts :: Keyword.t()
@@ -56,6 +57,7 @@ defmodule OAuth2.Client do
           headers: headers,
           params: params,
           pkce: pkce,
+          private: private,
           redirect_uri: redirect_uri,
           ref: ref,
           request_opts: request_opts,
@@ -72,6 +74,8 @@ defmodule OAuth2.Client do
             client_secret: "",
             headers: [],
             params: %{},
+            pkce: false,
+            private: %{},
             redirect_uri: "",
             ref: nil,
             request_opts: [],
@@ -80,8 +84,7 @@ defmodule OAuth2.Client do
             strategy: OAuth2.Strategy.AuthCode,
             token: nil,
             token_method: :post,
-            token_url: "/oauth/token",
-            pkce: false
+            token_url: "/oauth/token"
 
   @doc """
   Builds a new `OAuth2.Client` struct using the `opts` provided.
@@ -154,6 +157,22 @@ defmodule OAuth2.Client do
   """
   @spec put_param(t, String.t() | atom, any) :: t
   def put_param(%Client{params: params} = client, key, value) do
+    %{client | params: Map.put(params, "#{key}", value)}
+  end
+
+  @spec delete_param(t, String.t() | atom) :: t
+  def delete_param(%Client{params: params} = client, key) do
+    %{client | params: Map.delete(params, "#{key}")}
+  end
+
+  @spec put_private(t, String.t() | atom, any) :: t
+  def put_private(%Client{private: private} = client, key, value) do
+    %{client | private: Map.put(private, "#{key}", value)}
+  end
+
+  @spec put_param_from_private(t, String.t() | atom) :: t
+  def put_param_from_private(%Client{private: private, params: params} = client, key) do
+    value = Map.get(private, "#{key}")
     %{client | params: Map.put(params, "#{key}", value)}
   end
 
